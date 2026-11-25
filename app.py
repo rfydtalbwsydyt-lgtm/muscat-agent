@@ -225,10 +225,24 @@ SYSTEM = """أنت «وكيل خدمات بلدية مسقط». تساعد ال�
 - لا تخترع اشتراطات أو رسومًا أو أرقام بلاغات. إن لم تجد المعلومة فقل ذلك.
 - ذكّر أن المعلومات والرسوم تجريبية عند ذكرها."""
 
+_CLIENT = None
+
+def get_client():
+    global _CLIENT
+    if _CLIENT is None:
+        import anthropic
+        _CLIENT = anthropic.Anthropic()  # يقرأ ANTHROPIC_API_KEY
+    return _CLIENT
+
+try:
+    if os.environ.get("ANTHROPIC_API_KEY"):
+        get_client()  # تسخين عند بدء التشغيل
+except Exception:
+    pass
+
 def agent_chat(history, lang="ar", max_steps=8):
     """history: قائمة {role, content(text)}. تُرجع (الرد النصي)."""
-    import anthropic
-    client = anthropic.Anthropic()  # يقرأ ANTHROPIC_API_KEY
+    client = get_client()
     msgs = [dict(m) for m in history]
     for _ in range(max_steps):
         r = client.messages.create(model=MODEL, max_tokens=1000, system=SYSTEM + ("\n\nThe user interface is English: always respond in English." if lang == "en" else ""), tools=TOOLS, messages=msgs)
@@ -288,8 +302,8 @@ function show(id){tabs.forEach(([t])=>$(t).classList.toggle('on',t===id));[...$(
 show('chat');
 const hist=[];function add(t,c){const d=document.createElement('div');d.className='m '+c;d.textContent=t;$('log').append(d);$('log').scrollTop=1e9}
 add('مرحبًا! أخبرني بمشكلتك الميدانية أو اسأل عن الرسوم والاشتراطات أو تتبّع بلاغًا.','a');
-async function send(){const t=$('q').value.trim();if(!t)return;$('q').value='';add(t,'u');hist.push({role:'user',content:t});
- try{const r=await post('/api/chat',{history:hist});hist.push({role:'assistant',content:r.reply});add(r.reply,'a')}catch(e){add('تعذّر الاتصال بالخادم','a')}}
+async function send(){const t=$('q').value.trim();if(!t)return;$('q').value='';add(t,'u');hist.push({role:'user',content:t});const w=add(LANG==='en'?'Thinking…':'جارٍ التفكير…','a');
+ try{const r=await post('/api/chat',{history:hist});w.remove();hist.push({role:'assistant',content:r.reply});add(r.reply,'a')}catch(e){w.remove();add('تعذّر الاتصال بالخادم','a')}}
 $('send').onclick=send;$('q').onkeydown=e=>{if(e.key==='Enter')send()};
 $('fs').onclick=async()=>{const r=await post('/api/report',{description:$('fd').value,location:$('fl').value,contact:$('fc').value});
  const o=$('fo');o.hidden=false;o.innerHTML='';const p=document.createElement('div');
@@ -354,8 +368,8 @@ function show(id){tabs.forEach(([t])=>$(t).classList.toggle('on',t===id));[...$(
 show('chat');
 const hist=[];function add(t,c){const d=document.createElement('div');d.className='m '+c;d.textContent=t;$('log').append(d);$('log').scrollTop=1e9}
 add('Hello! Tell me about a problem in your area, ask about fees and requirements, or track a report.','a');
-async function send(){const t=$('q').value.trim();if(!t)return;$('q').value='';add(t,'u');hist.push({role:'user',content:t});
- try{const r=await post('/api/chat',{history:hist});hist.push({role:'assistant',content:r.reply});add(r.reply,'a')}catch(e){add('Could not reach the server','a')}}
+async function send(){const t=$('q').value.trim();if(!t)return;$('q').value='';add(t,'u');hist.push({role:'user',content:t});const w=add(LANG==='en'?'Thinking…':'جارٍ التفكير…','a');
+ try{const r=await post('/api/chat',{history:hist});w.remove();hist.push({role:'assistant',content:r.reply});add(r.reply,'a')}catch(e){w.remove();add('Could not reach the server','a')}}
 $('send').onclick=send;$('q').onkeydown=e=>{if(e.key==='Enter')send()};
 $('fs').onclick=async()=>{const r=await post('/api/report',{description:$('fd').value,location:$('fl').value,contact:$('fc').value});
  const o=$('fo');o.hidden=false;o.innerHTML='';const p=document.createElement('div');
