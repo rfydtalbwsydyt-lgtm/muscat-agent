@@ -300,7 +300,7 @@ const tabs=[['chat','المحادثة'],['regs','اللوائح والاشترا
 tabs.forEach(([id,n],i)=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>show(id);b.dataset.id=id;$('nav').append(b)});
 function show(id){tabs.forEach(([t])=>$(t).classList.toggle('on',t===id));[...$('nav').children].forEach(b=>b.classList.toggle('on',b.dataset.id===id))}
 show('chat');
-const hist=[];function add(t,c){const d=document.createElement('div');d.className='m '+c;d.textContent=t;$('log').append(d);$('log').scrollTop=1e9}
+const hist=[];function add(t,c){const d=document.createElement('div');d.className='m '+c;d.textContent=t;$('log').append(d);$('log').scrollTop=1e9;return d}
 add('مرحبًا! أخبرني بمشكلتك الميدانية أو اسأل عن الرسوم والاشتراطات أو تتبّع بلاغًا.','a');
 async function send(){const t=$('q').value.trim();if(!t)return;$('q').value='';add(t,'u');hist.push({role:'user',content:t});const w=add(LANG==='en'?'Thinking…':'جارٍ التفكير…','a');
  try{const r=await post('/api/chat',{history:hist});w.remove();hist.push({role:'assistant',content:r.reply});add(r.reply,'a')}catch(e){w.remove();add('تعذّر الاتصال بالخادم','a')}}
@@ -366,7 +366,7 @@ const tabs=[['chat','Chat'],['regs','Regulations'],['field','Field report'],['fe
 tabs.forEach(([id,n],i)=>{const b=document.createElement('button');b.textContent=n;b.onclick=()=>show(id);b.dataset.id=id;$('nav').append(b)});
 function show(id){tabs.forEach(([t])=>$(t).classList.toggle('on',t===id));[...$('nav').children].forEach(b=>b.classList.toggle('on',b.dataset.id===id))}
 show('chat');
-const hist=[];function add(t,c){const d=document.createElement('div');d.className='m '+c;d.textContent=t;$('log').append(d);$('log').scrollTop=1e9}
+const hist=[];function add(t,c){const d=document.createElement('div');d.className='m '+c;d.textContent=t;$('log').append(d);$('log').scrollTop=1e9;return d}
 add('Hello! Tell me about a problem in your area, ask about fees and requirements, or track a report.','a');
 async function send(){const t=$('q').value.trim();if(!t)return;$('q').value='';add(t,'u');hist.push({role:'user',content:t});const w=add(LANG==='en'?'Thinking…':'جارٍ التفكير…','a');
  try{const r=await post('/api/chat',{history:hist});w.remove();hist.push({role:'assistant',content:r.reply});add(r.reply,'a')}catch(e){w.remove();add('Could not reach the server','a')}}
